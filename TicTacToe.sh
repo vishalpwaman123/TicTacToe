@@ -12,3 +12,16 @@ done
 }
 
 initial
+
+echo "Enter Player1 Logo choice (X | O):"
+read logo1
+
+if (( logo1 == "x" || logo1 == "X" ))
+then
+	logo2="O"
+else
+	logo2="X"
+fi
+
+
+
