@@ -1,13 +1,12 @@
 
-#/bin/bash -x
-
 ROWS=3;
 COLUMNS=3;
 placeHolder="-";
-playerSymbol="X";
-compSymbol="O";
+player1="X";
+player2="O";
 rowPosition=0;
 columnPostion=0;
+
 
 declare -A gameBoard
 
@@ -42,8 +41,6 @@ function printBoard() {
 initBoard
 printBoard
 
-echo "your Symbol is : $playerSymbol"
-echo "computer symbol is : $compSymbol"
 
 function filingBoard() {
 	fill_row=$1
@@ -53,7 +50,7 @@ function filingBoard() {
 	gameBoard[$fill_row, $fill_column]=$fill_symbol;
 }
 
-#filingBoard 0 0 X
+
 
 function	occupiedPositionCheck() {
 	row=$1;
@@ -67,6 +64,27 @@ function	occupiedPositionCheck() {
 		return 1
 	fi
 }
+
+
+
+function playerPlay() {
+	while [ true ]
+	do
+		read -p "Enter Row : " player_row
+		read -p "Enter Column : " player_column
+
+		occupiedPositionCheck $row $column
+	
+		if [[ $? -eq 0 ]]
+		then
+			filingBoard $player_row $player_column $playerSymbol
+		else
+			echo "position is already Occupied, try diffrent space."
+			continue
+		fi
+	done
+}
+
 
 function horizontalRowCheck() {
 	row=0;
@@ -237,43 +255,9 @@ function rightDiagonalFilliedCheck() {
 
 	return 0
 }
-function playerPlay() {
-	while [ true ]
-	do
-		read -p "Enter Row : " player_row
-		read -p "Enter Column : " player_column
 
-		occupiedPositionCheck $row $column
-	
-		if [[ $? -eq 0 ]]
-		then
-			filingBoard $player_row $player_column $playerSymbol
-		else
-			echo "position is already Occupied, try diffrent space."
-			continue
-		fi
-	done
-}
 
-function computerPlay() {
-	while [ true ]
-	do
-		computer_rows=$(( RANDOM % 3 ))
-   	computer_Columns=$(( RANDOM % 3 ))
-
-	   occupiedPositionCheck $computer_rows $computer_columns
-	
-   	if [[ $? -eq 0 ]]
-   	then
-      	filingBoard $computer_rows $computer_columns $compSymbol
-   	else
-      	echo "position is already occupied. try duffrent space"
-			continue
-   	fi
-	done
-}
-
-function checkWinOrLoss() {
+function checkWin() {
 	checkVerticallyFilledBoard
 	resultForVericallyFillied=$?
 
@@ -298,7 +282,7 @@ function checkWinOrLoss() {
 		return 1
 	fi
 	
-   if [ $? -eq 1 ]
+	f [ $? -eq 1 ]
    then
       echo "Game is draw..!"
       return 1
@@ -306,6 +290,7 @@ function checkWinOrLoss() {
 
 	return 0
 }
+
 
 
 function playGame() {
@@ -319,14 +304,7 @@ function playGame() {
 			then
 				break;
 			fi
-			
-			computerPlay
-			printBoard
-			checkWin
-			if [[ $? == 1 ]]
-			then 
-				break;
-			fi
+		
 	done 
 }
 
@@ -345,9 +323,10 @@ function tossCoin() {
 	else
 		echo "computer is Playing First..."
 	fi
-	
+
 	playGame 
 }
 
 tossCoin
+
 
