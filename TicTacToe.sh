@@ -256,6 +256,24 @@ function rightDiagonalFilliedCheck() {
 	return 0
 }
 
+function computerPlay() {
+	while [ true ]
+	do
+		computer_rows=$(( RANDOM % 3 ))
+   	computer_Columns=$(( RANDOM % 3 ))
+
+	   occupiedPositionCheck $computer_rows $computer_columns
+	
+   	if [[ $? -eq 0 ]]
+   	then
+      	filingBoard $computer_rows $computer_columns $compSymbol
+   	else
+      	echo "position is already occupied. try duffrent space"
+			continue
+   	fi
+	done
+}
+
 
 function checkWin() {
 	checkVerticallyFilledBoard
@@ -302,6 +320,14 @@ function playGame() {
 			checkWin			
 			if [[ $? == 1 ]]
 			then
+				break;
+			fi
+			
+			computerPlay
+			printBoard
+			checkWin
+			if [[ $? == 1 ]]
+			then 
 				break;
 			fi
 		
