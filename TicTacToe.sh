@@ -1,10 +1,11 @@
+
 #/bin/bash -x
 
 ROWS=3;
 COLUMNS=3;
 placeHolder="-";
-player1="X";
-player2="O";
+playerSymbol="X";
+compSymbol="O";
 rowPosition=0;
 columnPostion=0;
 
@@ -41,7 +42,20 @@ function printBoard() {
 initBoard
 printBoard
 
-function occupiedPositionCheck() {
+echo "your Symbol is : $playerSymbol"
+echo "computer symbol is : $compSymbol"
+
+function filingBoard() {
+	fill_row=$1
+	fill_column=$2
+	fill_symbol=$3
+
+	gameBoard[$fill_row, $fill_column]=$fill_symbol;
+}
+
+#filingBoard 0 0 X
+
+function	occupiedPositionCheck() {
 	row=$1;
 	column=$2;
 
@@ -54,33 +68,22 @@ function occupiedPositionCheck() {
 	fi
 }
 
-function filingBoard() {
-	fill_row=$1
-	fill_column=$2
-	fill_symbol=$3
+function horizontalRowCheck() {
+	row=0;
+	column=$1;
+	symbol=$2;
 
-	gameBoard[$fill_row, $fill_column]=$fill_symbol;
-}
-
-
-function playerPlay() {
-	while [ true ]
+	while (( ${gameBoard[$row, $column]} == $symbol && $row < $ROWS ))
 	do
-		read -p "Enter Row : " player_row
-		read -p "Enter Column : " player_column
-
-		occupiedPositionCheck $row $column
-	
-		if [[ $? -eq 0 ]]
-		then
-			filingBoard $player_row $player_column $1
-		else
-			echo "position is already Occupied, try diffrent space."
-			continue
-		fi
+		(( row++ ))
 	done
-}
 
+	if [[ $row -eq $ROWS ]]
+	then
+		return 1
+	fi
+	return 0
+}
 function verticalColumnCheck() {
 	columns=0;
 	row=$1;
@@ -100,69 +103,22 @@ function verticalColumnCheck() {
 
 }
 
-
-function checkVerticallyFilliedBoard() {
-	row=0;
-	while (( $row < $ROWS ))
-	do
-		verticalColumnCheck $row $player1
-		resultForPlayer1=$?
-
-		verticalColumnCheck $row $player2
-		resultForPlayer2=$?
-
-		if [[ $resultForPlayer1 -eq 1 ]]
-		then
-			return 1
-		fi
-
-		if [[ $resultForPlayer2 -eq 1 ]]
-		then
-			return 2
-		fi
-	
-		(( row++ ))
-
-	done
-
-	return 0
-
-}
-
-function horizontalRowCheck() {
-	row=0;
-	column=$1;
-	symbol=$2;
-
-	while (( ${gameBoard[$row, $column]} == $symbol && $row < $ROWS ))
-	do
-		(( row++ ))
-	done
-
-	if [[ $row -eq $ROWS ]]
-	then
-		return 1
-	fi
-	return 0
-}
-
-
 function checkHorizontallyFilliedBoard() {
 	column=0;
 	while ((column < $COLUMNS ))
 	do
-		horizontalRowCheck $column $player1
-		resultForPlayer1=$?
+		horizontalRowCheck $column $playerSymbol
+		resultForPlayer=$?
 
-		horizontalRowCheck $column $player2
-		resultForPlayer2=$?
+		horizontalRowCheck $column $compSymbol
+		resultForComputer=$?
 
-		if [[ $resultForPlayer1 -eq 1 ]]
+		if [[ $resultForPlayer -eq 1 ]]
 		then
 			return 1
 		fi
 
-		if [[ $resultForPlayer2 -eq 1 ]]
+		if [[ $resultForComputer -eq 1 ]]
 		then
 			return 2
 		fi
@@ -175,6 +131,33 @@ function checkHorizontallyFilliedBoard() {
 
 }
 
+function checkVerticallyFilliedBoard() {
+	row=0;
+	while (( $row < $ROWS ))
+	do
+		verticalColumnCheck $row $playerSymbol
+		resultForPlayer=$?
+
+		verticalColumnCheck $row $compSymbol
+		resultForComputer=$?
+
+		if [[ $resultForPlayer -eq 1 ]]
+		then
+			return 1
+		fi
+
+		if [[ $resultForComputer -eq 1 ]]
+		then
+			return 2
+		fi
+	
+		(( row++ ))
+
+	done
+
+	return 0
+
+}
 
 function checkLeftDiagonal() {
 	symbol=$1
@@ -206,21 +189,28 @@ function checkRightDiagonal() {
 	do
 		(( row++ ))
 		(( column-- ))
+	done
 
+	if [[ $row -eq $ROWS ]]
+	then
+		return 1
+	fi
+	return 0
+}
 
 function leftDiagonalFilliedCheck() {
-	checkLeftDiagonal $player1
-	resultForPlayer1=$?
+	checkLeftDiagonal $playerSymbol
+	resultForPlayer=$?
 
-	checkRightDiagonal $player2
-	resultForPlayer2=$?
+	checkRightDiagonal $compSymbol
+	resultForComputer=$?
 
-	if [[ $rsultForPlayer1 -eq 1 ]]
+	if [[ $rsultForPlayer -eq 1 ]]
 	then
 		return 1
 	fi
 
-	if [[ $resultForPlayer2 -eq 1 ]]
+	if [[ $resultForComputer -eq 1 ]]
 	then
 		return 2
 	fi
@@ -247,9 +237,43 @@ function rightDiagonalFilliedCheck() {
 
 	return 0
 }
+function playerPlay() {
+	while [ true ]
+	do
+		read -p "Enter Row : " player_row
+		read -p "Enter Column : " player_column
 
+		occupiedPositionCheck $row $column
+	
+		if [[ $? -eq 0 ]]
+		then
+			filingBoard $player_row $player_column $playerSymbol
+		else
+			echo "position is already Occupied, try diffrent space."
+			continue
+		fi
+	done
+}
 
-function checkWin() {
+function computerPlay() {
+	while [ true ]
+	do
+		computer_rows=$(( RANDOM % 3 ))
+   	computer_Columns=$(( RANDOM % 3 ))
+
+	   occupiedPositionCheck $computer_rows $computer_columns
+	
+   	if [[ $? -eq 0 ]]
+   	then
+      	filingBoard $computer_rows $computer_columns $compSymbol
+   	else
+      	echo "position is already occupied. try duffrent space"
+			continue
+   	fi
+	done
+}
+
+function checkWinOrLoss() {
 	checkVerticallyFilledBoard
 	resultForVericallyFillied=$?
 
@@ -274,43 +298,39 @@ function checkWin() {
 		return 1
 	fi
 	
-	if [ $? -eq 1 ]
-        then
-            echo "Game is draw..!"
-            return 1
-        fi
+   if [ $? -eq 1 ]
+   then
+      echo "Game is draw..!"
+      return 1
+   fi
 
 	return 0
 }
 
 
-
 function playGame() {
-        M=$1
+
 	while [ true ]
 	do
-		if [[ M == 0 ]]
-		then
-			playerPlay $player1
+			playerPlay
 			printBoard
 			checkWin			
 			if [[ $? == 1 ]]
 			then
 				break;
 			fi
-			M=1
-		else
-			PlayerPlay $player2
+			
+			computerPlay
 			printBoard
 			checkWin
 			if [[ $? == 1 ]]
 			then 
 				break;
 			fi
-			M=0
-		fi
 	done 
 }
+
+
 
 
 function tossCoin() {
@@ -321,14 +341,13 @@ function tossCoin() {
 	#flip coin
 	if (( $coin == 0 ))
 	then
-		echo "Player1 are Playing First..."
+		echo "you are Playing First..."
 	else
-		echo "player2 is Playing First..."
+		echo "computer is Playing First..."
 	fi
 	
-	playGame $coin
+	playGame 
 }
 
 tossCoin
-
 
