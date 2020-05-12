@@ -9,6 +9,33 @@ do
 done
 }
 
+function display()
+{
+local i2=0
+for (( i=0 ; i<3 ; i++ ))
+do
+	for (( i1=0 ; i1<3 ; i1++ ))
+	do
+		printf "|---|"
+	done
+	printf "\n"
+
+	for (( j=0 ; j<3 ; j++ ))
+	do
+		printf "|${board[$((i2++))]}|"
+	done
+	printf "\n"
+	for (( i1=0 ; i1<3 ; i1++ ))
+	do
+		printf "|---|"
+	done
+	printf "\n"
+done
+
+}
+
+
+
 function Toss()
 {
 check=$(($RANDOM%2))
@@ -46,3 +73,8 @@ then
 else
 	echo "Player2 Win the toss "
 fi
+
+printf "\n\n"
+display
+
+printf "\n\n"
